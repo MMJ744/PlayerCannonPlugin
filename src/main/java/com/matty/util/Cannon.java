@@ -126,13 +126,9 @@ public class Cannon {
 			l.add(0.5,0,0.5);
 			ammo.teleport(l);
 			double v,h;//v for vertical, h for horizontal
-			switch (angle){
-				case 0: h = 2; v = 0; break;
-				case 45: h = 1; v = 1;break;
-				case 65: h = 0.5; v = 1.5;break;
-				case 90: h = 0; v = 2;break;
-				default: h = 1; v = 1; break;
-			}
+			double force = 2;
+			v = Math.sin(Math.toRadians(angle)) * force;
+			h = Math.cos(Math.toRadians(angle)) * force;
 			switch (direction){
 				case SOUTH:ammo.setVelocity(new Vector(0,v * powerLevel,h * powerLevel));break;
 				case NORTH:ammo.setVelocity(new Vector(0,v * powerLevel,-h * powerLevel));break;
