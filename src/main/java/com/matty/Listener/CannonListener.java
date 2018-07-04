@@ -29,6 +29,7 @@ public class CannonListener implements Listener{
 		plugin.getLogger().info("click");
 		if(e.getClickedBlock().getType().equals(Material.GLASS)){
 			Location location = e.getClickedBlock().getLocation();
+			plugin.getLogger().info(Helper.findDirection(location).toString());
 			if(cannonManager.hasCannon(location)){
 				Player player = e.getPlayer();
 				Cannon cannon = cannonManager.getCannon(location);
@@ -40,6 +41,8 @@ public class CannonListener implements Listener{
 				
 			}else if(Helper.ValidCannon(location)){
 				cannonManager.addCannon(location);
+			}else {
+				plugin.getLogger().info("invalid cannon");
 			}
 		}
 	}

@@ -3,7 +3,9 @@ package com.matty.util;
 import com.matty.main.PlayerCannonPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 
@@ -18,9 +20,9 @@ public class Cannon {
 	private Player ammo;
 	private int powerLevel;
 	private int angle;
-	private Direction direction;
-	private Block lever;
+	private BlockFace direction;
 	private Chest chest;
+	private Diode lDiode,rDiode;
 	
 	public Cannon(Location l, PlayerCannonPlugin plugin, CannonManager cm){
 		location = l;
@@ -28,30 +30,19 @@ public class Cannon {
 		this.plugin = plugin;
 		powerLevel = 1;
 		angle = 45;
-		direction = findDirection();
+		direction = Helper.findDirection(l);
 		cannonManager = cm;
-	}
-	
-	public int getPowerLevel() {
-		return powerLevel;
+		findBlocks();
 	}
 	
 	public void setPowerLevel(int powerLevel) {
-		if(powerLevel > 4){
-			this.powerLevel = 4;
-		}else if(powerLevel < 1){
-			this.powerLevel = 1;
-		}else this.powerLevel=powerLevel;
-		
+		this.powerLevel=powerLevel;
 	}
 	
 	public int getAngle() {
 		return angle;
 	}
 	
-	public Block getLever() {
-		return lever;
-	}
 	public void setAngle(int angle) {
 		this.angle=angle;
 	}
@@ -78,23 +69,48 @@ public class Cannon {
 		ammo.sendMessage("You have been unloaded from the cannon");
 	}
 	
-	public Direction findDirection(){
-		Location loc = location.clone();
-		if(loc.add(1,0,0).getBlock().getType().equals(Material.DIODE)){
-		
+	private void findBlocks(){
+		World world = location.getWorld();
+		double x = location.getX();
+		double y = location.getY();
+		double z = location.getZ();
+		Location diode1, diode2, chest;
+		switch (direction) {
+			case SOUTH:
+				diode1=new Location(world, x+1, y, z);
+				diode2=new Location(world, x-1, y, z);
+				chest=new Location(world, x, y, z-2);
+				break;
+			case NORTH:
+				diode1=new Location(world, x-1, y, z);
+				diode2=new Location(world, x+1, y, z);
+				chest=new Location(world, x, y, z+2);
+				break;
+			case EAST:
+				diode1=new Location(world, x, y, z-1);
+				diode2=new Location(world, x, y, z+1);
+				chest=new Location(world, x-2, y, z);
+				break;
+			case WEST:
+				diode1=new Location(world, x, y, z+1);
+				diode2=new Location(world, x, y, z-1);
+				chest=new Location(world, x+2, y, z);
+				break;
+			default:
+				diode1 = null;
+				diode2 = null;
+				chest = null;
+				break;
 		}
-		
-		
-		
-		
-		Location l = location.clone();
-		l.subtract(0,0,2);
-		chest = (Chest) l.getBlock().getState();
-		return Direction.SOUTH;
+		this.lDiode = (Diode) diode1.getBlock().getState().getData();
+		this.rDiode = (Diode) diode2.getBlock().getState().getData();
+		this.chest = (Chest) chest.getBlock().getState();
 	}
 	
 	public String fire(){
 		if(ammo == null) return "failed no ammo";
+		findBlocks();
+		powerLevel = lDiode.getDelay();
 		Inventory inv = chest.getBlockInventory();
 		if(inv.contains(Material.TNT, powerLevel)){
 			Location l = location.clone();
@@ -107,7 +123,7 @@ public class Cannon {
 				}
 			}
 			ammo = null;
-			return "cannon fired";
+			return "cannon fired with power: " + powerLevel;
 		} else return "failed not enough TNT";
 	}
 	
