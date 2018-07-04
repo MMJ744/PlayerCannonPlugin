@@ -10,6 +10,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Diode;
 import org.bukkit.util.Vector;
 
@@ -44,7 +45,13 @@ public class Cannon {
 	}
 	
 	public void setAngle(int angle) {
-		this.angle=angle;
+		plugin.getLogger().info(Integer.toString(angle));
+		switch (angle){ // default is 2 (45)
+			case 1:this.angle = 0; break;
+			case 3:this.angle = 65; break;
+			case 4:this.angle = 90; break;
+			default:this.angle = 45; break;
+		}
 	}
 	
 	public Location getLocation() {
@@ -105,25 +112,35 @@ public class Cannon {
 		this.lDiode = (Diode) diode1.getBlock().getState().getData();
 		this.rDiode = (Diode) diode2.getBlock().getState().getData();
 		this.chest = (Chest) chest.getBlock().getState();
+		powerLevel = lDiode.getDelay();
+		setAngle(rDiode.getDelay());
 	}
 	
 	public String fire(){
 		if(ammo == null) return "failed no ammo";
 		findBlocks();
-		powerLevel = lDiode.getDelay();
 		Inventory inv = chest.getBlockInventory();
 		if(inv.contains(Material.TNT, powerLevel)){
+			inv.removeItem(new ItemStack(Material.TNT, powerLevel));
 			Location l = location.clone();
 			l.add(0.5,0,0.5);
 			ammo.teleport(l);
+			double v,h;//v for vertical, h for horizontal
+			switch (angle){
+				case 0: h = 2; v = 0; break;
+				case 45: h = 1; v = 1;break;
+				case 65: h = 0.5; v = 1.5;break;
+				case 90: h = 0; v = 2;break;
+				default: h = 1; v = 1; break;
+			}
 			switch (direction){
-				case SOUTH: {
-					ammo.setVelocity(new Vector(0,2 * powerLevel,2 * powerLevel));
-					break;
-				}
+				case SOUTH:ammo.setVelocity(new Vector(0,v * powerLevel,h * powerLevel));break;
+				case NORTH:ammo.setVelocity(new Vector(0,v * powerLevel,-h * powerLevel));break;
+				case EAST:ammo.setVelocity(new Vector(h * powerLevel,v * powerLevel,0));break;
+				case WEST:ammo.setVelocity(new Vector(-h * powerLevel,v * powerLevel,0));break;
 			}
 			ammo = null;
-			return "cannon fired with power: " + powerLevel;
+			return "cannon fired with power: " + powerLevel + " and angle: " + angle;
 		} else return "failed not enough TNT";
 	}
 	
