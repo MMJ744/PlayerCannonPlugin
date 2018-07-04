@@ -8,12 +8,13 @@ import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 
 import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.material.Diode;
 import org.bukkit.util.Vector;
 
 public class Cannon {
 	private PlayerCannonPlugin plugin;
 	private Location location;
+	private CannonManager cannonManager;
 	private Player ammo;
 	private int powerLevel;
 	private int angle;
@@ -21,13 +22,14 @@ public class Cannon {
 	private Block lever;
 	private Chest chest;
 	
-	public Cannon(Location l, PlayerCannonPlugin plugin){
+	public Cannon(Location l, PlayerCannonPlugin plugin, CannonManager cm){
 		location = l;
 		ammo = null;
 		this.plugin = plugin;
 		powerLevel = 1;
 		angle = 45;
 		direction = findDirection();
+		cannonManager = cm;
 	}
 	
 	public int getPowerLevel() {
@@ -77,10 +79,16 @@ public class Cannon {
 	}
 	
 	public Direction findDirection(){
+		Location loc = location.clone();
+		if(loc.add(1,0,0).getBlock().getType().equals(Material.DIODE)){
+		
+		}
+		
+		
+		
+		
 		Location l = location.clone();
-		l.subtract(0,0,1);
-		lever = l.getBlock();
-		l.subtract(0,0,1);
+		l.subtract(0,0,2);
 		chest = (Chest) l.getBlock().getState();
 		return Direction.SOUTH;
 	}
@@ -104,6 +112,6 @@ public class Cannon {
 	}
 	
 	public void delete() {
-		plugin.removeCannon(location);
+		cannonManager.removeCannon(location);
 	}
 }

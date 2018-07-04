@@ -2,6 +2,7 @@ package com.matty.Listener;
 
 import com.matty.main.PlayerCannonPlugin;
 import com.matty.util.Cannon;
+import com.matty.util.CannonManager;
 import com.matty.util.Helper;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,20 +16,22 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class CannonListener implements Listener{
 	
 	private PlayerCannonPlugin plugin;
-	
-	public CannonListener(PlayerCannonPlugin plugin) {
+	private CannonManager cannonManager;
+	public CannonListener(PlayerCannonPlugin plugin, CannonManager cm) {
 		this.plugin = plugin;
+		cannonManager = cm;
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	@EventHandler
 	public void onPlayerClick(PlayerInteractEvent e) {
+		if(e.getClickedBlock() == null) return;
 		plugin.getLogger().info("click");
 		if(e.getClickedBlock().getType().equals(Material.GLASS)){
 			Location location = e.getClickedBlock().getLocation();
-			if(plugin.hasCannon(location)){
+			if(cannonManager.hasCannon(location)){
 				Player player = e.getPlayer();
-				Cannon cannon = plugin.getCannon(location);
+				Cannon cannon = cannonManager.getCannon(location);
 				if(cannon.loaded()){
 					player.sendMessage(cannon.fire());
 				}else {
@@ -36,8 +39,9 @@ public class CannonListener implements Listener{
 				}
 				
 			}else if(Helper.ValidCannon(location)){
-				plugin.addCannon(location);
+				cannonManager.addCannon(location);
 			}
 		}
 	}
+	
 }
